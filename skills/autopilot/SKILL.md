@@ -37,11 +37,11 @@ For each step in plan:
 
 ### Phase 1: Build
 - Dispatch `task-executor` subagent to implement
-- Pass: subtask description, ACs, scope, test spec
+- Pass: subtask description, ACs, scope, test spec, **Pattern Compliance (including Lint Assertions and Deviations)**
 
 ### Phase 2: Critic
 - Dispatch `critic` subagent to review (fresh context)
-- Pass: ACs + git diff + test results
+- Pass: ACs + git diff + test results + **Pattern Compliance (including Lint Assertions and Deviations)**
 
 ### Phase 3: Result Branch
 

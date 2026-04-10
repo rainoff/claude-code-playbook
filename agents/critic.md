@@ -32,16 +32,34 @@ You will receive:
 
 ## Test Results
 {test output}
+
+## Pattern Compliance
+| Domain | Mainstream approach | Example file (line) | Count |
+|--------|-------------------|---------------------|-------|
+| {domain} | {approach} | `{path}:{line}` | {N} instances |
+
+### Lint Assertions
+{project-specific grep/lint commands + expected results}
+
+### Deviations
+{none, or list permitted deviations}
 ```
 
 ## Review Dimensions (priority order)
 
-1. **Pattern Consistency** — Does the new code follow the project's existing patterns? Compare with similar files in the codebase. New abstractions, conventions, or styles that deviate from established code are a 🔴 Critical finding.
+1. **Pattern Consistency** — Compare against the Pattern Compliance table line by line:
+   a. For each listed domain, search the git diff for related code in that domain
+   b. Compare the new code's approach against the "Mainstream approach" column
+   c. Deviation recorded in Deviations → ✅ permitted, do not flag
+   d. Deviation NOT recorded in Deviations → 🔴 Critical: unpermitted pattern deviation
+   e. Open the example file at the referenced line number and do a side-by-side comparison with the new code
+   f. **Supplementary scan**: perform a general pattern check on all new code in the diff — flag any new patterns not covered by the table as 🟡 Important
 2. **Runtime Verification** — Do NOT trust the builder's test results. Run these yourself:
    - `npm run build` or `npx tsc --noEmit` — catch build/type errors
    - `npm test` or `pytest` (if tests exist) — catch logic errors
+   - **Pattern Lint** — execute each Lint Assertion command, compare actual output against expected result. Any mismatch = 🔴 Critical
    - Check for known runtime pitfalls (see checklist below)
-   - Any build failure or test failure is a 🔴 Critical finding.
+   - Any build failure, test failure, or lint assertion failure is a 🔴 Critical finding.
 3. **AC Compliance** — Does the code actually satisfy each AC? Not "looks like it does" — verify.
 4. **Logic Errors** — Off-by-one, null access, race conditions, wrong comparisons, unhandled states.
 5. **Security** — Injection, auth bypass, secrets exposure, unsafe data handling.
@@ -81,6 +99,14 @@ Static analysis for common patterns that compile fine but crash at runtime. Grep
 
 2. 🟡 [Important] file_path:line — {what's wrong}
    Fix: {specific suggestion}
+
+### Pattern Compliance Audit
+| Domain | Mainstream approach | New code approach | Result |
+|--------|-------------------|-------------------|--------|
+| {domain} | {mainstream} | {actual} | ✅ consistent / ⚠️ permitted deviation / 🔴 unpermitted deviation |
+
+### Lint Assertions
+- `{command}`: ✅ expected result matched | ❌ expected {X} but got {Y}
 
 ### AC Verification
 - AC-1: ✅ Verified — {how you confirmed}

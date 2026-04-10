@@ -27,6 +27,9 @@ After task-executor completes, **before the main session accepts**, launch the `
 
 ## Test Results
 {test execution results}
+
+## Pattern Compliance
+{copy Pattern Compliance section from spec, including table, Lint Assertions, and Deviations}
 ```
 
 **Critic result handling:**
@@ -71,6 +74,7 @@ Launch `alignment-checker` subagent (fresh context), passing:
 
 Acceptance checklist:
 - [ ] Critic review passed (or only has 🟡 findings)
+- [ ] Pattern Compliance audit passed (all Lint Assertions match expected results)
 - [ ] Alignment check passed (if applicable, or only has 🟡 findings)
 - [ ] All ACs marked as complete
 - [ ] All tests passing (`npm test` / `pytest`)
@@ -129,6 +133,9 @@ Format for correction subtask:
 
 ## Scope
 - Modifiable files: {list only files that need to be corrected}
+
+## Pattern Compliance
+{inherited from original subtask, copy the full Pattern Compliance section}
 ```
 
 The correction subtask is handed to the task-executor agent to execute, following the same flow as the original step.
