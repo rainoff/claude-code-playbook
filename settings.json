@@ -66,8 +66,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c \"echo '⚠️ Context is about to be compacted. Consider running /session to extract knowledge first.'\"",
-            "timeout": 5
+            "command": "bash -c \"ts=$(date '+%Y-%m-%d %H:%M:%S'); proj=$(basename \\\"$(pwd)\\\"); echo \\\"$ts | $proj | compact triggered\\\" >> ~/.claude/.compact-log; { echo \\\"# Pre-Compact Checkpoint ($ts)\\\"; echo \\\"## Working Directory\\\"; pwd; echo \\\"## Git Status\\\"; git status --porcelain 2>/dev/null | head -20; echo \\\"## Recent Commits\\\"; git log --oneline -5 2>/dev/null; } > ~/.claude/.compact-marker; echo '⚠️ Context is about to be compacted. If you have not written a session note, this is your last chance. Run /session now or at least record the current task state.'\"",
+            "timeout": 10
           }
         ]
       }

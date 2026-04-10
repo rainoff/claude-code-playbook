@@ -9,3 +9,4 @@
 - 2026-04-10: model-quality — switched to 200k model + effort high + showThinkingSummaries + lowered /clear threshold to 40% (response to anthropics/claude-code#42796 analysis)
 - 2026-04-10: session-management — added cross-session todo writeback rule + PostToolUse hook to detect commits and remind about writeback
 - 2026-04-10: worktree-memory — added worktree memory strategy (parent resolution, read/write to parent, anti-trampling, subagent injection)
+- 2026-04-10: context-compact — PreCompact hook upgrade (marker + log), mandatory 40%/60% thresholds, Post-Compact Recovery rule

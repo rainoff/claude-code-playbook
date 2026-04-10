@@ -55,4 +55,9 @@
 
 - Use @ file references instead of pasting file contents.
 - Prefer reading files with tools rather than asking the user to copy content in.
-- If context usage exceeds 50%, proactively suggest: "/clear + paste task summary to continue with fresh context."
+- **Context health monitoring** (mandatory, do not skip):
+  - **40%** → You MUST tell the user: "Context is at 40%, recommend /session + /clear." Not "consider" — you MUST say it.
+  - **60%** → Stop accepting new tasks. Run /session + /clear first.
+  - When in doubt about context usage, warn early rather than late.
+- Long session degradation risk: 200k models exhibit reasoning loops and shortcut behavior under high context usage. Early /clear is the most effective protection.
+- **Post-Compact Recovery**: If `~/.claude/.compact-marker` exists, immediately read the file to understand pre-compaction state, write a brief session note, then delete the marker. This is the first action after compaction, before the user's next instruction.
