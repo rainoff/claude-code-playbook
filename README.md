@@ -1,10 +1,12 @@
 # claude-code-playbook
 
+**This is not a tips collection — it's an opinionated, self-iterating harness for Claude Code.**
+
 A battle-tested playbook for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) — rules, agents, skills, hooks, and memory system to keep AI disciplined and productive.
 
 This repo maps to the `~/.claude` directory. Clone it and adjust personal settings to get started.
 
-> **Note**: This configuration was built incrementally from real usage, not designed all at once. Start with a few rules, add more as you encounter pain points.
+> **Note**: This configuration was built incrementally from real usage, not designed all at once. Every rule has a failure case behind it. Start with a few rules, add more as you encounter pain points.
 
 ## Directory Structure
 
@@ -14,7 +16,7 @@ This repo maps to the `~/.claude` directory. Clone it and adjust personal settin
 ├── settings.json             # Permissions, hooks, language settings
 ├── keybindings.json          # Custom keybindings
 │
-├── rules/                    # Always-active behavior rules (13)
+├── rules/                    # Always-active behavior rules (12)
 │   ├── dev-workflow.md       # Task startup, commit discipline, testing, quality, context management
 │   ├── session-management.md # Session notes, memory search fallback, stale todo check
 │   ├── knowledge-index.md   # Three-tier memory system (Hot/Warm/Glacier)
@@ -22,9 +24,8 @@ This repo maps to the `~/.claude` directory. Clone it and adjust personal settin
 │   ├── verification-loop.md # Critic → Alignment Check → verification loop (max 2 fix rounds)
 │   ├── ownership.md         # CODEOWNERS-based cross-module change checks
 │   ├── spec-template.md     # Spec format and AC-Test mapping
-│   ├── translation-system.md # Domain-specific: translation pipeline rules (example, replaceable)
-│   ├── figma-workflow.md    # Figma MCP 4-phase workflow
-│   ├── visual-ui-workflow.md # Visual change workflow (Playwright screenshot verification)
+│   ├── figma-workflow.md    # Figma MCP 4-phase workflow (activation: has Figma design)
+│   ├── visual-ui-workflow.md # Visual change workflow (activation: UI visual changes)
 │   ├── subagent-strategy.md # Fork/Teammate/Worktree delegation strategy
 │   ├── web-fetch-safety.md  # External content safety (anti prompt injection)
 │   └── CHANGELOG.md         # Rule change log
@@ -129,13 +130,17 @@ git clone https://github.com/rainoff/claude-code-playbook.git ~/.claude
 #    - CLAUDE.md: adjust principles (most can be used as-is)
 ```
 
-### Recommended Onboarding Order
+### Maturity Levels
 
-Don't enable everything at once. Recommended:
+Don't enable everything at once. Know where you are and what to add next.
 
-1. **Week 1**: `CLAUDE.md` + `rules/dev-workflow.md` + `rules/session-management.md` only
-2. **Week 2**: Add `agents/` and `skills/git-commit/`
-3. **As needed**: Gradually add other rules and commands
+| Level | What You Have | What You Get |
+|-------|--------------|-------------|
+| **L1 — Foundation** | `CLAUDE.md` + `rules/dev-workflow.md` + `rules/session-management.md` | Context Check, commit discipline, session handoff |
+| **L2 — Automation** | L1 + `agents/` + `skills/` + `rules/verification-loop.md` | Builder-Critic loop, auto commit/review, /plan workflow |
+| **L3 — Self-Iteration** | L2 + `memory/` + `/reflect` + `/evolve` | Three-tier memory, rule evolution from real failures, cross-session learning |
+
+Start at L1. Move to L2 when you feel the AI making mistakes a second reviewer would catch. Move to L3 when you want the system to improve itself across sessions.
 
 ### Customization
 
@@ -143,7 +148,7 @@ Don't enable everything at once. Recommended:
 |------|-----------|
 | Don't use JIRA | Delete `rules/jira-sync.md` |
 | Don't use Figma | Delete `rules/figma-workflow.md` |
-| Have your own domain rules | Replace `rules/translation-system.md` |
+| Have domain-specific rules | Add to project-level `{project}/.claude/rules/` instead of global |
 | Use macOS | Notification hook: `claude-notify-macos.sh` (included) |
 | Use Linux | Notification hook: `claude-notify-linux.sh` (included) |
 | Use Windows | Write your own PowerShell notification script |
@@ -155,6 +160,19 @@ Don't enable everything at once. Recommended:
 - **Deterministic where possible** — Hooks use deterministic checks (git status, echo reminders), not AI self-discipline.
 - **Critic must be context-isolated** — AI reviewing its own code will rationalize. A fresh-context critic is effective.
 - **Three tiers solve stale memory** — Stale memory is worse than no memory. Tiering + archival controls memory quality.
+
+## How This Compares
+
+| | This Playbook | [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice) | [BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD) | [HumanLayer](https://github.com/humanlayer/humanlayer) |
+|---|---|---|---|---|
+| **Type** | Opinionated harness | Best practices reference | Full Agile methodology | Human-in-the-loop SDK |
+| **Scope** | `~/.claude` config only | Documentation + examples | 9 agent roles, 4 phases | MCP daemon + cloud |
+| **Rules origin** | Grown from real failures | Curated from community | Designed upfront | N/A (infrastructure) |
+| **Self-iteration** | /reflect + /evolve loop | No | No | No |
+| **Memory system** | Three-tier (Hot/Warm/Glacier) | No | No | No |
+| **Weight** | Medium | Light | Heavy | Separate layer |
+
+They're complementary, not competing. You can use HumanLayer for approval gates, borrow patterns from shanraisshan's examples, or adopt BMAD's lifecycle phases — alongside this playbook's rules and memory system.
 
 ## License
 
