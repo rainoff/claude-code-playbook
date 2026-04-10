@@ -2,10 +2,12 @@
 
 ## Auto-Writing Session Notes
 
-Only write a session note to `~/.claude/projects/{project}/sessions/{date}.md` at these moments:
+Only write a session note at these moments (path: `~/.claude/projects/{project}/sessions/{date}.md`; **in a worktree, write to the parent** — see `worktree-memory.md`):
 
 1. **User explicitly requests it** (/session or says "done", "stop here", "talk tomorrow") — write a complete handoff
-2. **After a commit** — append one line `- {hash} {message}` to the "Completed" section of that day's session note (if the file already exists)
+2. **After a commit — session writeback** (do both together):
+   - Append one line `- ✅ {hash} {message}` to the "Completed" section of that day's session note (if the file already exists)
+   - Check the previous session note's "Next Up" section: if this commit completes one of the pending items, go back and change that item from `[ ]` to `[x]` with the commit hash
 
 Do not proactively write session notes at any other time.
 
@@ -32,9 +34,10 @@ Do not proactively write session notes at any other time.
 At the start of every new conversation, if the user asks "where did we leave off", "what's next", "continue", or similar:
 
 1. First read the current project's `sessions/` and `memory/MEMORY.md`
-2. **If the path is not found, use `glob **/MEMORY.md` and `glob **/sessions/**/*.md` to search down from `~/.claude/projects/`**
-3. Never declare "no records" after trying only one path — the project key provided by the system may differ from the actual directory name
-4. Respond based on what is found
+2. **Worktree awareness**: if the project key contains `-worktrees-`, resolve the parent project key (take everything before `-worktrees-`) and read from the parent's `memory/` and `sessions/`. See `worktree-memory.md`
+3. **If the path is not found, use `glob **/MEMORY.md` and `glob **/sessions/**/*.md` to search down from `~/.claude/projects/`**
+4. Never declare "no records" after trying only one path — the project key provided by the system may differ from the actual directory name
+5. Respond based on what is found
 
 ### Todo Progress Check
 

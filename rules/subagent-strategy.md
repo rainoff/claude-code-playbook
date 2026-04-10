@@ -10,6 +10,12 @@
 | **Worktree** | Git-isolated | None | Parallel development that requires file modifications but may conflict |
 | **Teammate** | No isolation | Shared | Tasks that need to know each other's progress and collaborate to completion |
 
+## Worktree Mode: Memory Injection
+
+When spawning a worktree agent, the main session must inject parent project information into the prompt (path, memory location, branch name), otherwise the agent will start from an empty worktree project directory with no memory at all.
+
+Resolution rules and prompt template are in `worktree-memory.md`.
+
 ## When to Delegate vs. Do It Yourself
 
 **Delegate to subagent**:

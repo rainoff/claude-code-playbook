@@ -107,6 +107,7 @@ Or tell the AI directly and it will store them in memory.
 ## AI Behavior Rules
 
 ### Starting a new session
+0. **Worktree resolution**: if the project key contains `-worktrees-`, resolve the parent project key (take everything before `-worktrees-`) and read from the parent's `memory/` for all subsequent steps. See `worktree-memory.md`
 1. Read MEMORY.md (Hot) — get the system map
 2. Based on the user's task description, locate the relevant modules
 3. Use frontmatter descriptions to scan and determine which Warm memory files to read
