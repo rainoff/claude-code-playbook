@@ -1,28 +1,28 @@
 # SDD — Spec-Driven Development
 
-> Every module has a ground truth spec. Read the spec before making changes — do not scan code on the fly.
+> Every module has a ground truth spec. Read the spec before changing anything — don't just scan the code.
 
-## Activation Condition
+## When to Apply
 
-Applies to all projects. Introduced incrementally — write a spec only when you touch a module. Missing specs do not block the workflow.
+Applies to all projects. Introduce gradually — only write a spec for a module when you touch it; missing specs don't block work.
 
-## Two Types of Spec
+## Two Kinds of Spec
 
 | Type | Purpose | Description | Template |
 |------|---------|-------------|----------|
-| **System Spec** | as-is | Describes what the system looks like right now (ground truth) | See below |
-| **Change Spec** | to-be | Describes what to change (delta) | `rules/spec-template.md` |
+| **System Spec** | as-is | How the system looks today (ground truth) | Below |
+| **Change Spec** | to-be | What's being changed (delta) | `rules/spec-template.md` |
 
-## System Spec Storage Location
+## Where System Specs Live
 
-Resolution priority (use the first match):
+Resolution order (first match wins):
 
 1. **In-repo OpenSpec**: `{project}/openspec/specs/{module}.md`
 2. **Private specs**: `~/.claude/projects/{key}/specs/system/{module}.md`
-3. **Memory fallback**: relevant memory files in `~/.claude/projects/{key}/memory/`
-4. **Trigger creation**: none of the above exist → propose creating one (user can skip)
+3. **Memory fallback**: relevant memory files under `~/.claude/projects/{key}/memory/`
+4. **Prompt to create**: none of the above exist → propose creating one (user can skip)
 
-For projects where placing `openspec/` in the repo is not viable (e.g., shared monorepos, restricted repo permissions, or preference against non-code directories in the repo), use Private specs.
+For projects where an `openspec/` directory can't live in the repo (shared monorepos, restricted repo permissions, or not wanting non-code directories in the repo), use Private specs.
 
 ## System Spec Template
 
@@ -31,7 +31,7 @@ Frontmatter:
 ```yaml
 ---
 module: {module name}
-scope: {directory or file pattern covered}
+scope: {directories or file patterns covered}
 last_verified: {YYYY-MM-DD}
 ---
 ```
@@ -42,72 +42,103 @@ Body:
 # {Module Name}
 
 ## Intent
-<!-- One paragraph: why this module exists and what problem it solves -->
+<!-- One paragraph: why this module exists, what problem it solves -->
 
 ## Public API
-<!-- Externally exposed interfaces: function signatures, endpoints, events, CLI commands -->
+<!-- External-facing interfaces: function signatures, endpoints, events, CLI commands -->
 
 ## Internal Structure
-<!-- Internal composition: key files, class/function relationships, data flow -->
+<!-- Inner composition: key files, class/function relationships, data flow -->
 
 ## Extension Points
-<!-- How to add functionality without changing the core: hooks, plugins, config, etc. -->
+<!-- How to add functionality without changing the core: hooks, plugins, config -->
 
 ## Dependencies
-<!-- Upstream: what this depends on. Downstream: what depends on this module -->
+<!-- Upstream: what this depends on. Downstream: who depends on this module -->
 
 ## Gotchas
-<!-- Traps when using or modifying this module. Same format as CLAUDE.md Gotchas -->
+<!-- Traps when using/modifying. Same format as CLAUDE.md Gotchas -->
 
 ## Patterns
 <!-- Code patterns specific to this module, complementing the Pattern Constitution -->
 ```
 
-### Section Descriptions
+### Section Notes
 
-- **Intent**: One paragraph. Not a feature list — "why it exists"
-- **Public API**: Externally visible interfaces. Changing these = breaking change
-- **Internal Structure**: How it is organized internally. Does not need to be line-by-line, but must let a reader understand the module architecture
-- **Extension Points**: How to extend. "Adding a new X" — what to change
-- **Dependencies**: Upstream and downstream. Who is affected if this module changes
-- **Gotchas**: Traps. Accumulated from memory feedback and real experience
-- **Patterns**: Code patterns specific to this module. Cross-module patterns go in the Pattern Constitution. If a pattern is already covered by the Constitution (has a corresponding Lint Assertion), do not repeat it here — use `→ see constitution: {domain}` instead
+- **Intent**: one paragraph. Not a feature list, but "why it exists"
+- **Public API**: external-facing interfaces. Changes here = breaking changes
+- **Internal Structure**: how it's organized internally. Doesn't need line-level precision, but should give the reader a grasp of the module architecture
+- **Extension Points**: how to extend. "Adding a new X" should modify what
+- **Dependencies**: upstream and downstream. Who breaks if this changes
+- **Gotchas**: traps. Accumulate from memory feedback and actual experience
+- **Patterns**: code patterns unique to this module. Cross-module patterns go in the Pattern Constitution. If a pattern is already covered by the Constitution (with a corresponding Lint Assertion), don't repeat — use `→ see constitution: {domain}` as a pointer
 
-## When It Triggers
+## Mirror Intake (Before Spec Generation)
 
-### Auto-propose creation (non-blocking)
+When the user signals intent to produce a change spec (triggering `/plan`, saying "write a spec for X", etc.), AI follows this flow:
+
+### Step 1: Read onboarded state
+
+**Before actively prompting, AI must first read** the `trigger_1_spec_intake.onboarded` value in `~/.claude/projects/{project}/.hydaelyn/onboarded.json` (treat missing file as `false`). This value determines the next prompt phrasing and whether skip is offered.
+
+### Step 2: Active (conversational) prompt
+
+**Non-first-time (`onboarded: true`)**:
+
+> Want to do a Mirror intake first? I'll ask about 3 key questions around {brief direction}. (Or skip for now if you'd rather.)
+
+**First-time (`onboarded: false` or missing file) — no skip option**:
+
+> This is your first time hitting the spec-intake trigger. Walk through the flow once, then you can decide whether to keep using it. I'll ask 3 questions.
+
+### Step 3: Branch on user response
+
+- **Accept** → enter `/hyd-mirror` skill's intake flow (the skill updates `onboarded.json` on completion)
+- **Decline** (only available when non-first-time) → **the rule layer (main-session AI) writes a skip trace line to today's session note on the spot**:
+
+  ```
+  - ⏭ {HH:MM} Skipped Mirror at spec-intake
+  ```
+
+  Then spec generation proceeds normally. The trace write is the rule layer's responsibility (the skill isn't invoked when the user declines, so the skill can't write it).
+
+See `skills/hyd-mirror/SKILL.md` for the detailed intake flow, mutual calibration, and artifact format.
+
+## Trigger Timing
+
+### Auto-prompt to create (non-blocking)
 
 - `/plan` touches a module with no system spec → propose creating one
-- User can skip ("not needed this time") → does not block the workflow
-- Accepted → create during the /plan flow, as the output of Step 3.2
+- User can skip ("don't need it this time") → doesn't block the flow
+- Accept → create during the /plan flow as Step 3.2 output
 
-### When to update
+### Update timing
 
-- After a change spec is fully implemented → check whether the corresponding system spec needs updating
-- Module's Public API was modified → must update
-- Module's Internal Structure was modified → recommended update
-- During `/session` knowledge extraction, flag specs that need updating
+- After implementing a change spec → check whether the corresponding system spec needs updating
+- Modified the module's Public API → must update
+- Modified Internal Structure → suggested update
+- `/session` knowledge extraction flags specs needing update
 - When updating a spec, also update `last_verified` to today's date
 
 ### Staleness check
 
-- `/housekeeping` scans specs where `last_verified` is more than 30 days ago → reminds to update
-- Does not auto-update — only reminds
+- `/housekeeping` scans specs with `last_verified` older than 30 days → prompts update
+- Doesn't auto-update, only prompts
 
 ## Division of Labor with Memory
 
-| Knowledge type | Storage location | Examples |
-|---------------|-----------------|----------|
+| Knowledge type | Location | Example |
+|----------------|----------|---------|
 | Structural | System Spec | API signatures, module dependencies, extension points |
-| Experiential | Memory (feedback) | "Last time we changed X, Y broke" |
-| Status | Memory (project) | "Currently building feature Z" |
-| Normative | Rules | "All projects require a context check" |
+| Experiential | Memory (feedback) | "Last time I changed X and Y broke" |
+| State-like | Memory (project) | "Currently working on Z feature" |
+| Normative | Rules | "All projects must do a context check" |
 
-**Migration principle**: If memory contains descriptions of module structure (API, dependencies, internal organization), migrate that content into the system spec when creating it. Keep only experiential content in memory.
+**Migration principle**: if memory contains content describing module structure (API, dependencies, internal organization), migrate it into the system spec when creating one; memory should retain only experiential content.
 
 ## OpenSpec CLI Integration
 
-Use the CLI when available; otherwise use Read/Write manually. The format is the same either way.
+Use the CLI if available for speed; otherwise, manual Read/Write works. Format is identical.
 
 ```bash
 # Initialize (optional)
@@ -123,4 +154,4 @@ openspec change create {ticket-id}
 openspec change apply {ticket-id}
 ```
 
-**Not a dependency** — the CLI is just an accelerator. The spec file itself is what matters; create it by any means.
+**Not a dependency** — the CLI is just an accelerator. The core is the spec files themselves; any way of creating them works.
