@@ -34,6 +34,40 @@ Glacier → memory/archive/ (completed/expired, indexed but not proactively load
 - When scanning, use `grep -L 'archived: true' memory/` to filter out archived files
 - To retrieve from Glacier, simply remove the archived flag
 
+## Tier Assignment Criteria
+
+> Unclear criteria → three tiers collapse into one. Use the litmus test below to decide.
+
+### Hot (MEMORY.md)
+
+**Litmus test**: Will the AI make a mistake within the first three actions of the next session if it doesn't read this?
+
+- ✅ Module responsibilities + pointers to Warm files (map role)
+- ✅ Pointers to in-progress plans
+- ❌ Current-state snapshots (progress numbers, deployment status) — easily outdated; leave to session notes
+- ❌ Cross-project immutable principles — those belong in CLAUDE.md or `rules/`
+
+**Hot vs CLAUDE.md boundary**: CLAUDE.md holds cross-project immutable principles ("always run a context check"); MEMORY.md is the current map for this project ("the auth module is at `src/auth/`, see `feedback_auth.md`"). Mixing them bloats MEMORY.md and destroys its pointer function.
+
+### Warm (memory/*.md)
+
+**Litmus test**: Does this knowledge affect judgment for specific tasks, but isn't needed in every session?
+
+- ✅ Module gotchas, past pitfalls, why A was chosen over B
+- ✅ Third-party integration details, design decisions
+- ✅ User feedback (style, commit preferences, workflow expectations)
+- ❌ Facts the code already expresses (call graphs, API signatures) — just grep
+- ❌ Single-occurrence debug traces, unless they reveal a systemic issue
+
+### Glacier (archived flag)
+
+**Litmus test**: Does this no longer affect current decisions, but might someone three months from now ask "why did we decide this originally"?
+
+- ✅ Goes to Glacier: triggers are detailed in the "Archiving Trigger Conditions" table below
+- ❌ Delete directly: outdated drafts with no historical value, copy-paste mistakes, abandoned explorations
+
+Retrieval: remove the `archived: true` flag to promote back to Warm — no file move needed.
+
 ## Quick Scan Protocol
 
 Use the frontmatter `description` field as the quick-scan summary (replaces the old L0 HTML comment approach).
