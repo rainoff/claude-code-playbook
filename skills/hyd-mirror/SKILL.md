@@ -7,6 +7,14 @@ description: Hydaelyn Mirror — provides space to think at critical cold-start 
 
 > Audience: Mirror is designed for users who want to reflect during AI collaboration. It respects every choice to enter or skip, and doesn't treat reflection as a mandatory gate. Tone must stay neutral, inclusive, non-exclusive — never an examiner, but a serious-but-not-interrogating peer.
 
+## Scope (Mirror ≠ /plan)
+
+Mirror intake's purpose is **understanding calibration**, not producing a structured spec. `/plan` is the skill that structures already-understood content into a change spec. They're sequential, not interchangeable:
+
+`/hyd-mirror` intake (calibrate understanding) → `/plan` (structure) → spec output
+
+**Common misunderstanding**: treating Mirror intake as a substitute for `/plan`. The result is intake becomes "half-writing the spec", and `/plan` becomes formulaic restatement. Mirror's output is **aligned understanding**, not the spec artifact itself.
+
 ## When to Trigger
 
 ### Trigger 1 — Spec Intake (before spec generation)
